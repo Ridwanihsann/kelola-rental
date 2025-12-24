@@ -1,27 +1,25 @@
 {
     "build": {
         "builder": "NIXPACKS",
-        "nixpacksPlan": {
-            "phases": {
-                "setup": {
-                    "nixPkgs": [
-                        "php84",
-                        "php84Extensions.gd",
-                        "php84Extensions.pdo_sqlite",
-                        "php84Packages.composer",
-                        "nodejs_22"
-                    ]
-                },
-                "install": {
-                    "cmds": ["composer install --no-dev --optimize-autoloader"]
-                },
-                "build": {
-                    "cmds": ["npm ci", "npm run build"]
-                }
+        "phases": {
+            "setup": {
+                "nixPkgs": [
+                    "php84",
+                    "php84Extensions.gd",
+                    "php84Extensions.pdo_sqlite",
+                    "php84Packages.composer",
+                    "nodejs_22"
+                ]
             },
-            "start": {
-                "cmd": "touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=$PORT"
+            "install": {
+                "cmds": ["composer install --no-dev --optimize-autoloader"]
+            },
+            "build": {
+                "cmds": ["npm ci", "npm run build"]
             }
         }
+    },
+    "start": {
+        "cmd": "mkdir -p storage/app/public && php artisan storage:link && touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT"
     }
 }
