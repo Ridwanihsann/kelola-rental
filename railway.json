@@ -8,7 +8,7 @@
                         "php84",
                         "php84Extensions.gd",
                         "php84Extensions.pdo_sqlite",
-                        "composer",
+                        "php84Packages.composer",
                         "nodejs_22"
                     ]
                 },
