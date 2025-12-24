@@ -7,9 +7,11 @@
                     "php84",
                     "php84Extensions.gd",
                     "php84Extensions.pdo_sqlite",
+                    "php84Extensions.fileinfo",   
+                    "php84Extensions.curl",
                     "php84Packages.composer",
                     "nodejs_22"
-                ]
+                    ]
             },
             "install": {
                 "cmds": ["composer install --no-dev --optimize-autoloader",
