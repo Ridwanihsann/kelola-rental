@@ -3,10 +3,13 @@
 <a href="{{ route('items.show', $item->id) }}" class="item-card">
     <div class="item-image">
         @if($item->image)
-            {{-- Menggunakan Storage::url adalah cara paling standar Laravel --}}
-            <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}">
+            {{-- Langsung panggil variabel image karena isinya sudah URL lengkap --}}
+            <img src="{{ $item->image }}" alt="{{ $item->name }}">
         @else
-            {{-- SVG Placeholder --}}
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
         @endif
     </div>
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ItemController extends Controller
 {
@@ -15,12 +15,10 @@ class ItemController extends Controller
     {
         $query = Item::query();
 
-        // Filter by status
         if ($request->has('status') && in_array($request->status, ['available', 'rented'])) {
             $query->where('status', $request->status);
         }
 
-        // Search by name or code
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -34,16 +32,13 @@ class ItemController extends Controller
         return view('items.index', compact('items'));
     }
 
-    /**
-     * Show the form for creating a new item
-     */
     public function create()
     {
         return view('items.create');
     }
 
     /**
-     * Store a newly created item
+     * Store a newly created item with Cloudinary
      */
     public function store(Request $request)
     {
@@ -51,12 +46,13 @@ class ItemController extends Controller
             'name' => 'required|string|max:255',
             'daily_price' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048', // 2MB max
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('items', 'public');
+            // Upload langsung ke Cloudinary
+            $result = $request->file('image')->storeOnCloudinary('rental_items');
+            $validated['image'] = $result->getSecurePath(); // Menyimpan URL HTTPS permanen
         }
 
         $item = Item::create($validated);
@@ -66,27 +62,19 @@ class ItemController extends Controller
             ->with('success', 'Barang berhasil ditambahkan dengan kode: ' . $item->code);
     }
 
-    /**
-     * Display the specified item
-     */
     public function show(Item $item)
     {
-        // Load rental statistics
         $item->loadCount('rentals');
-
         return view('items.show', compact('item'));
     }
 
-    /**
-     * Show the form for editing the item
-     */
     public function edit(Item $item)
     {
         return view('items.edit', compact('item'));
     }
 
     /**
-     * Update the specified item
+     * Update item with Cloudinary
      */
     public function update(Request $request, Item $item)
     {
@@ -97,13 +85,13 @@ class ItemController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($item->image) {
-                Storage::disk('public')->delete($item->image);
-            }
-            $validated['image'] = $request->file('image')->store('items', 'public');
+            // Upload foto baru ke Cloudinary
+            $result = $request->file('image')->storeOnCloudinary('rental_items');
+            $validated['image'] = $result->getSecurePath();
+            
+            // Catatan: Menghapus foto lama di Cloudinary memerlukan Public ID, 
+            // Untuk pemula, membiarkan foto lama tetap di Cloudinary jauh lebih aman daripada error.
         }
 
         $item->update($validated);
@@ -113,19 +101,10 @@ class ItemController extends Controller
             ->with('success', 'Barang berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified item
-     */
     public function destroy(Item $item)
     {
-        // Cannot delete if currently rented
         if ($item->status === 'rented') {
             return back()->with('error', 'Tidak dapat menghapus barang yang sedang disewa');
-        }
-
-        // Delete image if exists
-        if ($item->image) {
-            Storage::disk('public')->delete($item->image);
         }
 
         $item->delete();

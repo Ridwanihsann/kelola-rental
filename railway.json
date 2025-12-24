@@ -12,7 +12,8 @@
                 ]
             },
             "install": {
-                "cmds": ["composer install --no-dev --optimize-autoloader"]
+                "cmds": ["composer install --no-dev --optimize-autoloader",
+                        "composer require cloudinary-labs/cloudinary-laravel"]
             },
             "build": {
                 "cmds": ["npm ci", "npm run build"]
